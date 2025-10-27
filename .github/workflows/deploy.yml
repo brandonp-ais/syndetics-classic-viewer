@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Build and Upload Artifacts
 
 on:
   push:
@@ -11,12 +11,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # If you're using pnpm, add this step then change the commands and cache key below to use `pnpm`
-      # - name: Install pnpm
-      #   uses: pnpm/action-setup@v3
-      #   with:
-      #     version: 8
-
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
@@ -26,35 +20,12 @@ jobs:
       - name: Install dependencies
         run: npm i
 
-      - name: build
-        env:
-          BASE_PATH: "/${{ github.event.repository.name }}"
-        run: |
-          npm run build
+      - name: Build
+        run: npm run build
 
-      - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          path: "build/" # this should match the `pages` option in your adapter-static options
-
-  # Deploy job
-  deploy:
-    # Add a dependency to the build job
-    needs: build
-
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
+          name: build
+          path: build/
+          retention-days: 5
